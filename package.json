@@ -1,0 +1,28 @@
+{
+  "name": "indicator.email",
+  "version": "0.0.1",
+  "description": "An indicator light for your email.",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nquinlan/indicator.email.git"
+  },
+  "author": "Nick & Scott",
+  "contributors": [
+    "Nick Quinlan <nick@nicholasquinlan.com>",
+    "Scott Motte <mot@mot.la>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nquinlan/indicator.email/issues"
+  },
+  "homepage": "https://github.com/nquinlan/indicator.email",
+  "dependencies": {
+    "dotenv": "^0.4.0",
+    "express": "^4.8.7",
+    "googleapis": "^1.0.11"
+  }
+}
