@@ -1,7 +1,7 @@
 var express = require('express');
-var app = express();
-
 var google = require("googleapis");
+var db = require ('./middleware/db');
+var uuid = require('node-uuid');
 
 var dotenv = require('dotenv');
 dotenv.load();
@@ -11,6 +11,8 @@ var GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_ID;
 var GOOGLE_REDIRECT_URL = process.env.GOOGLE_REDIRECT_URL;
 
 var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
+var app = express();
+app.use( db(MONGODB_URL) );
 
 app.get('/', function(req, res){
 	res.send('indicator.email');
