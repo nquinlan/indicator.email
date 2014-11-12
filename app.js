@@ -4,6 +4,7 @@ var google = require('googleapis');
 var db = require ('./middleware/db');
 var uuid = require('node-uuid');
 var _ = require('lodash');
+var async = require('async');
 
 var dotenv = require('dotenv');
 dotenv.load();
@@ -132,6 +133,50 @@ app.get('/api/user/:user/inbox', function (req, res) {
 		res.send(inbox);
 	});
 });
+
+function getQuartile (q, db, user, count, cb) {
+	db.collection('inboxes').findOne(
+		{ user: user.userHash },
+		{ count: true },
+		{ 
+			sort : "count",
+			skip : count * q/4 - 1,
+			limit : 1
+		},
+		function (err, doc) {
+			cb(err, doc);
+		}
+	);
+}
+
+
+app.all('/user/:user*', userLookup)
+app.get('/user/:user/indicator.:format', function (req, res) {
+	getInbox(req.db, req.user, function (err, inbox) {
+		var inboxes = req.db.collection('inboxes').find({ user: req.user.userHash });
+		// Get Median
+		inboxes.count(function(err, inboxCount){
+			async.parallel({
+				first:  function (callback) { getQuartile(1, req.db, req.user, inboxCount, callback) },
+				second: function (callback) { getQuartile(2, req.db, req.user, inboxCount, callback) },
+				third:  function (callback) { getQuartile(3, req.db, req.user, inboxCount, callback) }
+			},
+			function (err, quartiles) {
+				console.log("quartiles", err, quartiles);
+				if(inbox.count > quartiles.third) {
+					res.send("RED");
+				} else if(inbox.count < quartiles.first) {
+					res.send("GREEN");
+				} else {
+					res.send("YELLOW");
+				}
+
+			});
+		});
+		
+	});
+})
+
 var server = app.listen(3000, function() {
 	console.log('Listening on port %d', server.address().port);
 });
