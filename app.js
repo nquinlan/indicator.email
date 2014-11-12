@@ -30,6 +30,7 @@ app.get('/', function(req, res){
 
 app.get('/oauth/google/authenticate', function (req, res) {
 	var url = googleAuthClient.generateAuthUrl({
+		access_type: 'offline',
 		scope: [
 			'https://www.googleapis.com/auth/plus.me',
 			'https://www.googleapis.com/auth/userinfo.email',
@@ -59,8 +60,17 @@ app.get('/oauth/google', function (req, res) {
 			});
 			user.userHash = uuid.v1();
 			console.log(user);
-			req.db.collection('users').insert(user, function (err, doc) {
+			var userUpsert = { 
+				$set : user,
+				$setOnInsert : {
+					userHash : user.userHash
+				},
+				$currentDate: { lastModified: true }
+			};
+			delete userUpsert.$set.userHash;
+			req.db.collection('users').update({ email : user.email }, userUpsert, { upsert: true }, function (err, doc) {
 				// Token stored, redirect to indicator page
+				// Schedule Iron Worker
 				res.send("rockin");
 			});
 		});
