@@ -1,7 +1,9 @@
 var express = require('express');
-var google = require("googleapis");
+var basicAuth = require('basic-auth-connect');
+var google = require('googleapis');
 var db = require ('./middleware/db');
 var uuid = require('node-uuid');
+var _ = require('lodash');
 
 var dotenv = require('dotenv');
 dotenv.load();
@@ -64,6 +66,72 @@ app.get('/oauth/google', function (req, res) {
 	});
 });
 
+function getInbox (db, user, cb) {
+	googleAuthClient.setCredentials(user.tokens.google);
+	gmail.users.messages.list({ q: "in:inbox", userId: user.email, auth: googleAuthClient}, function (err, inbox) {
+		if (err) {
+			cb(err, null);
+		}
+		inbox.count = inbox.resultSizeEstimate;
+		inbox.exact = false;
+		if(!inbox.nextPageToken) {
+			inbox.count = inbox.messages ? inbox.messages.length : 0;
+			inbox.exact = true;
+		}
+		var publicInbox = { count: inbox.count, exact: inbox.exact };
+		cb(null, publicInbox);
+	})
+}
+
+function saveInbox (db, user, inbox) {
+	inbox.user = user.userHash;
+	inbox.lastModified = new Date();
+	db.collection('inboxes').insert(inbox, function (err, doc) {
+		if(err) {
+			throw err;
+		}
+	});
+}
+
+function userLookup (req, res, next) {
+	var user = req.params.user;
+	req.db.collection('users').findOne({ userHash : user }, function (err, doc) {
+		if(err || doc === null) {
+			res.error(401, "A user could not be found. Please specify an existing user.");
+		}
+		req.user = doc;
+		next();
+	}) 
+}
+
+app.all('/api/*', basicAuth(process.env['API_CLIENT_ID'], process.env['API_CLIENT_SECRET']));
+
+app.all('/api/*', function (req, res, next) {
+	res.error = function (code, message, more) {
+		var error = {
+			"error" : true,
+			"message" : message
+		};
+
+		error = _.merge(error, more || {});
+
+		res.status(code);
+		res.send(error);
+		res.end();
+	}
+	next();
+});
+
+app.all('/api/user/:user*', userLookup);
+
+app.get('/api/user/:user/inbox', function (req, res) {
+	getInbox(req.db, req.user, function (err, inbox) {
+		inbox.api = true;
+		inbox.regular = Boolean(req.query.regular);
+		saveInbox(req.db, req.user, inbox);
+		res.send(inbox);
+	});
+});
 var server = app.listen(3000, function() {
 	console.log('Listening on port %d', server.address().port);
 });

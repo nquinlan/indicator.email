@@ -21,9 +21,11 @@
   },
   "homepage": "https://github.com/nquinlan/indicator.email",
   "dependencies": {
+    "basic-auth-connect": "^1.0.0",
     "dotenv": "^0.4.0",
     "express": "^4.8.7",
     "googleapis": "^1.0.11",
+    "lodash": "^2.4.1",
     "mongodb": "^1.4.9",
     "node-uuid": "^1.4.1"
   }
