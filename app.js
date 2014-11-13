@@ -87,23 +87,29 @@ app.get('/oauth/google', function (req, res) {
 			req.db.collection('users').update({ email : user.email }, userUpsert, { upsert: true }, function (err, doc) {
 				// Token stored, redirect to indicator page
 				// Schedule Iron Worker
-				console.log(doc);
-				worker.schedulesCreate(
-					"poll", 
-					{
-						user: doc.userHash,
-						host: req.get('host'),
-						api_user: API_CLIENT_ID,
-						api_key: API_CLIENT_SECRET
-					},
-					{
-						"start_at" : Math.floor((new Date()).getTime()/1000),
-						"run_every" : 60*60*6
-					},
-					function (err, body) {
+				if(err) {
+					console.log(err);
+					res.send("darn");
+					return false;
+				}
+				if(doc != 1) {
+					worker.schedulesCreate(
+						"poll", 
+						{
+							user: doc.userHash,
+							host: req.get('host'),
+							api_user: API_CLIENT_ID,
+							api_key: API_CLIENT_SECRET
+						},
+						{
+							"start_at" : Math.floor((new Date()).getTime()/1000),
+							"run_every" : 60*60*6
+						},
+						function (err, body) {
 
-					}
-				);
+						}
+					);
+				}
 				res.send("rockin");
 			});
 		});
