@@ -13,7 +13,7 @@ dotenv.load();
 var GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 var GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 var GOOGLE_REDIRECT_URL = process.env.GOOGLE_REDIRECT_URL;
-var MONGODB_URL = process.env.MONGODB_URL || process.env.MONGOHQ_URL;
+var MONGODB_URL = process.env.MONGODB_URL || process.env.MONGOHQ_URL || process.env.MONGOLAB_URI;
 
 var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 var gmail = google.gmail('v1');
