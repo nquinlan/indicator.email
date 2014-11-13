@@ -11,8 +11,9 @@ Set your settings there. Get your [Google Credentials here](https://console.deve
 
 To deploy to Heroku you'll need the following addons
 ```
-heroku addons:add iron_worker
-heroku addons:add mongolab
+heroku addons:add iron_worker:lite
+heroku addons:add mongolab:sandbox
+```
 ```
 
 To generate the indicator `pngs` from `svgs` use the following command:
