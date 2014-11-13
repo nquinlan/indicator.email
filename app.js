@@ -109,8 +109,19 @@ app.get('/oauth/google', function (req, res) {
 
 						}
 					);
+					res.send("rockin, created: " + user.userHash);
+				} else {
+					req.db.collection('users').findOne({ email : user.email }, function (err, doc) {
+						if(err) {
+							res.error(500, "SHOOT");
+							return false;
+						}
+						
+						res.send("rockin, updated: " + doc.userHash);
+					});
 				}
-				res.send("rockin");
+
+				
 			});
 		});
 	});
