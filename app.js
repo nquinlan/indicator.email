@@ -92,7 +92,8 @@ app.get('/oauth/google', function (req, res) {
 					res.send("darn");
 					return false;
 				}
-				if(doc != 1) {
+
+				if(doc !== 1) {
 					worker.schedulesCreate(
 						"poll", 
 						{
