@@ -75,13 +75,13 @@ app.get('/oauth/google', function (req, res) {
 				}
 			});
 			user.userHash = uuid.v1();
+			user.lastModified = new Date();
 			console.log(user);
 			var userUpsert = { 
 				$set : user,
 				$setOnInsert : {
 					userHash : user.userHash
-				},
-				$currentDate: { lastModified: true }
+				}
 			};
 			delete userUpsert.$set.userHash;
 			req.db.collection('users').update({ email : user.email }, userUpsert, { upsert: true }, function (err, doc) {
