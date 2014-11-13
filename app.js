@@ -20,6 +20,7 @@ var IRON_WORKER_TOKEN = process.env.IRON_WORKER_TOKEN;
 var IRON_WORKER_PROJECT_ID = process.env.IRON_WORKER_PROJECT_ID;
 var API_CLIENT_ID = process.env.API_CLIENT_ID;
 var API_CLIENT_SECRET = process.env.API_CLIENT_SECRET;
+var PORT = process.env.PORT || 3000;
 
 var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 var gmail = google.gmail('v1');
@@ -304,6 +305,6 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 	});
 })
 
-var server = app.listen(3000, function() {
+var server = app.listen(PORT, function() {
 	console.log('Listening on port %d', server.address().port);
 });
