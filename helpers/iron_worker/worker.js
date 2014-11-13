@@ -14,16 +14,19 @@ var endpoint = {
 };
 
 var req = https.request(endpoint, function(res) {
-	console.log("statusCode: ", res.statusCode);
 
 	res.on('data', function(d) {
 		process.stdout.write(d);
+
+		if(res.statusCode != 200) {
+			process.exit(0);
+		}
 	});
 });
 
-req.write(req_data)
 req.end();
 
 req.on('error', function(e) {
-	console.error(e);
+	process.stdout.write(e);
+	process.exit(0);
 });
