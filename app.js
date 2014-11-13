@@ -5,6 +5,7 @@ var db = require ('./middleware/db');
 var uuid = require('node-uuid');
 var _ = require('lodash');
 var async = require('async');
+require('enum').register();
 
 var dotenv = require('dotenv');
 dotenv.load();
@@ -20,6 +21,12 @@ var plus = google.plus('v1');
 
 var app = express();
 app.use( db(MONGODB_URL) );
+
+var INDICATOR_CACHE_TIME =  process.env.INDICATOR_CACHE_TIME || 0;
+
+var indicatorTypes = new Enum(['unknown', 'bad', 'good', 'okay']);
+
+var root = __dirname;
 
 app.get('/', function(req, res){
 	req.db.collection('users').find().toArray(function(err, users) {
@@ -159,29 +166,107 @@ function getQuartile (q, db, user, count, cb) {
 	);
 }
 
+function sendIndicator (indicatorType, requestedFormat, res) {
+	var format = "svg";
+	if(requestedFormat.toLowerCase() == "png") {
+		format = "png"
+	}
 
-app.all('/user/:user*', userLookup)
+	console.log(indicatorType);
+
+	var indicatorName;
+	switch (indicatorType) {
+		case indicatorTypes.good:
+			indicatorName = "good";
+			break;
+		case indicatorTypes.bad:
+			indicatorName = "bad";
+			break;
+		case indicatorTypes.okay:
+			indicatorName = "okay";
+			break;
+		case indicatorTypes.unknown:
+		default:
+			indicatorName = "unknown";
+			break;
+	}
+
+	console.log("SENDING FILE", root + "/assets/indicators/" + indicatorName + "." + format);
+
+	return res.sendFile(root + "/assets/indicators/" + indicatorName + "." + format, {
+		maxAge : INDICATOR_CACHE_TIME
+	});
+}
+
+app.all('/user/:user/indicator.:format', function (req, res, next) {
+	
+	var requestedFormat = req.params.format;
+
+	res.error = function (code, message, more) {
+		var error = {
+			"error" : true,
+			"message" : message
+		};
+
+		error = _.merge(error, more || {});
+
+		res.set('X-Error', JSON.stringify(error));
+
+		console.log(indicatorTypes.unknown, requestedFormat, res);
+		sendIndicator(indicatorTypes.unknown, requestedFormat, res);
+		// res.end();
+		return;
+	}
+	
+	next();
+});
+
+app.all('/user/:user*', userLookup);
+
+
 app.get('/user/:user/indicator.:format', function (req, res) {
+	if(!req.user) {
+		return false;
+	}
+	
 	getInbox(req.db, req.user, function (err, inbox) {
 		var inboxes = req.db.collection('inboxes').find({ user: req.user.userHash });
 		// Get Median
 		inboxes.count(function(err, inboxCount){
-			async.parallel({
-				first:  function (callback) { getQuartile(1, req.db, req.user, inboxCount, callback) },
-				second: function (callback) { getQuartile(2, req.db, req.user, inboxCount, callback) },
-				third:  function (callback) { getQuartile(3, req.db, req.user, inboxCount, callback) }
-			},
-			function (err, quartiles) {
-				console.log("quartiles", err, quartiles);
-				if(inbox.count > quartiles.third) {
-					res.send("RED");
-				} else if(inbox.count < quartiles.first) {
-					res.send("GREEN");
-				} else {
-					res.send("YELLOW");
-				}
+			// If we have a few inboxes let's give a data driven indicator, otherwise let's use our numbers.
+			if(inboxCount > 7) {
+				async.parallel({
+					first:  function (callback) { getQuartile(1, req.db, req.user, inboxCount, callback) },
+					second: function (callback) { getQuartile(2, req.db, req.user, inboxCount, callback) },
+					third:  function (callback) { getQuartile(3, req.db, req.user, inboxCount, callback) }
+				},
+				function (err, quartiles) {
+					console.log("quartiles", err, quartiles);
+					var indicatorType = indicatorTypes.unknown;
+					if(err) {
+						sendIndicator(indicatorType, req.params.format, res);
+						return false;
+					}
 
-			});
+					if(inbox.count > quartiles.third) {
+						var indicatorType = indicatorTypes.bad;
+					} else if(inbox.count < quartiles.first) {
+						var indicatorType = indicatorTypes.good;
+					} else {
+						var indicatorType = indicatorTypes.okay;
+					}
+					sendIndicator(indicatorType, req.params.format, res);
+				});
+			}else{
+				if(inbox.count > 10) {
+					var indicatorType = indicatorTypes.bad;
+				} else if(inbox.count < 5) {
+					var indicatorType = indicatorTypes.good;
+				} else {
+					var indicatorType = indicatorTypes.okay;
+				}
+				sendIndicator(indicatorType, req.params.format, res);
+			}
 		});
 		
 	});
