@@ -37,6 +37,23 @@ var indicatorTypes = new Enum(['unknown', 'bad', 'good', 'okay']);
 
 var root = __dirname;
 
+// TEMP CATCH ALL ERROR MESSAGE
+app.all('*', function (req, res, next) {
+	res.error = function (code, message, more) {
+		var error = {
+			"error" : true,
+			"message" : message
+		};
+
+		error = _.merge(error, more || {});
+
+		res.status(code);
+		res.send(error);
+		res.end();
+	}
+	next();
+});
+
 app.get('/', function(req, res){
 	req.db.collection('users').find().toArray(function(err, users) {
 		console.log(users);
