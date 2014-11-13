@@ -93,11 +93,11 @@ app.get('/oauth/google', function (req, res) {
 			});
 			user.userHash = uuid.v1();
 			user.lastModified = new Date();
-			console.log(user);
+			var userHash = user.userHash;
 			var userUpsert = { 
 				$set : user,
 				$setOnInsert : {
-					userHash : user.userHash
+					userHash : userHash
 				}
 			};
 			delete userUpsert.$set.userHash;
@@ -115,7 +115,11 @@ app.get('/oauth/google', function (req, res) {
 						return false;
 					}
 
-					if(doc.userHash === user.userHash) {
+					console.log(doc, user);
+					console.log("docHash, userHash", doc.userHash, user.userHash, userHash);
+
+
+					if(doc.userHash === userHash) {
 						worker.schedulesCreate(
 							"poll", 
 							{
