@@ -84,46 +84,46 @@ app.get('/oauth/google', function (req, res) {
 				}
 			};
 			delete userUpsert.$set.userHash;
-			req.db.collection('users').update({ email : user.email }, userUpsert, { upsert: true }, function (err, doc) {
-				// Token stored, redirect to indicator page
-				// Schedule Iron Worker
-				if(err) {
-					console.log(err);
-					res.send("darn");
-					return false;
-				}
+			req.db.collection('users').findAndModify(
+				{ email : user.email },
+				[['_id','asc']],
+				userUpsert,
+				{ upsert: true, new: true },
+				function (err, doc) {
+					// Token stored, redirect to indicator page
+					// Schedule Iron Worker
+					if(err) {
+						console.log(err);
+						res.send("darn");
+						return false;
+					}
 
-				if(doc !== 1) {
-					worker.schedulesCreate(
-						"poll", 
-						{
-							user: doc.userHash,
-							host: req.get('host'),
-							api_user: API_CLIENT_ID,
-							api_key: API_CLIENT_SECRET
-						},
-						{
-							"start_at" : Math.floor((new Date()).getTime()/1000),
-							"run_every" : 60*60*6
-						},
-						function (err, body) {
-
-						}
-					);
-					res.send("rockin, created: " + user.userHash);
-				} else {
-					req.db.collection('users').findOne({ email : user.email }, function (err, doc) {
-						if(err) {
-							res.error(500, "SHOOT");
-							return false;
-						}
-						
+					if(doc.userHash === user.userHash) {
+						worker.schedulesCreate(
+							"poll", 
+							{
+								user: doc.userHash,
+								host: req.get('host'),
+								api_user: API_CLIENT_ID,
+								api_key: API_CLIENT_SECRET
+							},
+							{
+								"start_at" : Math.floor((new Date()).getTime()/1000),
+								"run_every" : 60*60*6
+							},
+							function (err, workerInfo) {
+								console.log(workerInfo);
+								req.db.collection('users').update({ userHash : user.userHash}, { $set : { worker : workerInfo } }, function (err, doc) {});
+							}
+						);
+						res.send("rockin, created: " + doc.userHash);
+					} else {
 						res.send("rockin, updated: " + doc.userHash);
-					});
-				}
+					}
 
 				
-			});
+				}
+			);
 		});
 	});
 });
