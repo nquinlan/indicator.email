@@ -4,7 +4,7 @@
   "description": "An indicator light for your email.",
   "main": "app.js",
   "scripts": {
-    "start" : "node app.js",
+    "start": "node app.js",
     "test": "mocha test"
   },
   "repository": {
@@ -31,6 +31,7 @@
     "enum": "^0.2.6",
     "express": "^4.8.7",
     "googleapis": "^1.0.11",
+    "iron_worker": "^0.1.2",
     "lodash": "^2.4.1",
     "mongodb": "^1.4.9",
     "node-uuid": "^1.4.1"

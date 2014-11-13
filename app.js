@@ -5,6 +5,8 @@ var db = require ('./middleware/db');
 var uuid = require('node-uuid');
 var _ = require('lodash');
 var async = require('async');
+var iron_worker = require('iron_worker');
+
 require('enum').register();
 
 var dotenv = require('dotenv');
@@ -14,10 +16,16 @@ var GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 var GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 var GOOGLE_REDIRECT_URL = process.env.GOOGLE_REDIRECT_URL;
 var MONGODB_URL = process.env.MONGODB_URL || process.env.MONGOHQ_URL || process.env.MONGOLAB_URI;
+var IRON_WORKER_TOKEN = process.env.IRON_WORKER_TOKEN;
+var IRON_WORKER_PROJECT_ID = process.env.IRON_WORKER_PROJECT_ID;
+var API_CLIENT_ID = process.env.API_CLIENT_ID;
+var API_CLIENT_SECRET = process.env.API_CLIENT_SECRET;
 
 var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 var gmail = google.gmail('v1');
 var plus = google.plus('v1'); 
+
+var worker = new iron_worker.Client({token: IRON_WORKER_TOKEN, project_id: IRON_WORKER_PROJECT_ID});
 
 var app = express();
 app.use( db(MONGODB_URL) );
@@ -78,6 +86,23 @@ app.get('/oauth/google', function (req, res) {
 			req.db.collection('users').update({ email : user.email }, userUpsert, { upsert: true }, function (err, doc) {
 				// Token stored, redirect to indicator page
 				// Schedule Iron Worker
+				console.log(doc);
+				worker.schedulesCreate(
+					"poll", 
+					{
+						user: doc.userHash,
+						host: req.get('host'),
+						api_user: API_CLIENT_ID,
+						api_key: API_CLIENT_SECRET
+					},
+					{
+						"start_at" : Math.floor((new Date()).getTime()/1000),
+						"run_every" : 60*60*6
+					},
+					function (err, body) {
+
+					}
+				);
 				res.send("rockin");
 			});
 		});
@@ -122,7 +147,7 @@ function userLookup (req, res, next) {
 	}) 
 }
 
-app.all('/api/*', basicAuth(process.env['API_CLIENT_ID'], process.env['API_CLIENT_SECRET']));
+app.all('/api/*', basicAuth(API_CLIENT_ID, API_CLIENT_SECRET));
 
 app.all('/api/*', function (req, res, next) {
 	res.error = function (code, message, more) {
@@ -214,7 +239,6 @@ app.all('/user/:user/indicator.:format', function (req, res, next) {
 
 		console.log(indicatorTypes.unknown, requestedFormat, res);
 		sendIndicator(indicatorTypes.unknown, requestedFormat, res);
-		// res.end();
 		return;
 	}
 	
@@ -223,6 +247,14 @@ app.all('/user/:user/indicator.:format', function (req, res, next) {
 
 app.all('/user/:user*', userLookup);
 
+app.get('/user/:user', function (req, res) {
+	res.send(
+				'<h1>' + req.user.email + '</h1>' + 
+				'<p><em>indicator.email shows the status of a user\'s inbox.</em></p>' +
+				'<p><img src="./indicator.svg"></p>' +
+				'<p>When a user\'s inbox is overfull the light will be red. Yellow indicates an average inbox and green a near empty one.</p>'
+			);
+});
 
 app.get('/user/:user/indicator.:format', function (req, res) {
 	if(!req.user) {
