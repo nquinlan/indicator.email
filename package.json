@@ -4,11 +4,15 @@
   "description": "An indicator light for your email.",
   "main": "app.js",
   "scripts": {
+    "start" : "node app.js",
     "test": "mocha test"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/nquinlan/indicator.email.git"
+  },
+  "engines": {
+    "node": "0.10.x"
   },
   "author": "Nick & Scott",
   "contributors": [
