@@ -129,12 +129,17 @@ app.get('/oauth/google', function (req, res) {
 								api_key: API_CLIENT_SECRET
 							},
 							{
-								"start_at" : Math.floor((new Date()).getTime()/1000),
+								"start_at" : (new Date()).toISOString(),
 								"run_every" : 60*60*6
 							},
 							function (err, workerInfo) {
-								console.log(workerInfo);
-								req.db.collection('users').update({ userHash : user.userHash}, { $set : { worker : workerInfo } }, function (err, doc) {});
+								if(err) {
+									return false;
+									// theoretically this should throw an error and prompt the user to try again
+								}
+								req.db.collection('users').update({ userHash : user.userHash}, { $set : { worker : workerInfo.id } }, function (err, doc) {
+									
+								});
 							}
 						);
 						res.send("rockin, created: " + doc.userHash);
