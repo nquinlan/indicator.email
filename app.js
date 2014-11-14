@@ -54,7 +54,9 @@ app.all('*', function (req, res, next) {
 		error = _.merge(error, more || {});
 
 		res.status(code);
-		res.render('error', error);
+		res.send(error);
+		// TODO: Determine why the following doesn't work.
+		// res.render('error', error);
 		res.end();
 	}
 	next();
