@@ -129,6 +129,8 @@ iron_worker upload poll
 cd ../..
 ```
 
+_Your Iron Project & Token will be taken from the environment variables you just loaded._
+
 ### Start the app!
 The app can now be started! :smiley:
 
