@@ -146,9 +146,9 @@ app.get('/oauth/google', function (req, res) {
 								});
 							}
 						);
-						res.send("rockin, created: " + doc.userHash);
+						res.redirect('/user/' + doc.userHash + '/edit?created=1');
 					} else {
-						res.send("rockin, updated: " + doc.userHash);
+						res.redirect('/user/' + doc.userHash + '/edit');
 					}
 
 				
