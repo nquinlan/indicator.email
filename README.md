@@ -1,4 +1,4 @@
-# indicator.email ![Inbox Status •](assets/indicators/good.png?raw=true) ![Inbox Status •](assets/indicators/okay.png?raw=true) ![Inbox Status •](assets/indicators/bad.png?raw=true)
+# indicator.email <img alt="Inbox Status •" src="assets/indicators/good.png?raw=true" width="99" height="20" /> <img alt="Inbox Status •" src="assets/indicators/okay.png?raw=true" width="99" height="20" /> <img alt="Inbox Status •" src="assets/indicators/bad.png?raw=true" width="99" height="20" />
 
 ## Setup
 
