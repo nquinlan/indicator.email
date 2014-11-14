@@ -351,6 +351,11 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 					} else {
 						var indicatorType = indicatorTypes.okay;
 					}
+
+					if(inbox.count === 0) {
+						var indicatorType = indicatorTypes.good;
+					}
+					
 					sendIndicator(indicatorType, req.params.format, res);
 				});
 			}else{
