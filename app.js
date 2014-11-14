@@ -44,7 +44,6 @@ app.set('view engine', '.hbs');
 
 app.use('/assets', express.static(__dirname + '/assets'));
 
-// TEMP CATCH ALL ERROR MESSAGE
 app.all('*', function (req, res, next) {
 	res.error = function (code, message, more) {
 		var error = {
@@ -55,7 +54,7 @@ app.all('*', function (req, res, next) {
 		error = _.merge(error, more || {});
 
 		res.status(code);
-		res.send(error);
+		res.render('error', error);
 		res.end();
 	}
 	next();
@@ -78,14 +77,9 @@ app.get('/oauth/google/authenticate', function (req, res) {
 });
 
 app.get('/oauth/google', function (req, res) {
-	console.log(req.query);
 	googleAuthClient.getToken(req.query.code, function (err, tokens) {
-		console.log(err);
-		console.log(tokens);
 		googleAuthClient.setCredentials(tokens);
 		plus.people.get({ userId: 'me', auth: googleAuthClient }, function(err, profile) {
-			console.log(err);
-			console.log(profile);
 			// store tokens in db
 			var user = {};
 			user.tokens = {};
@@ -112,10 +106,9 @@ app.get('/oauth/google', function (req, res) {
 				{ upsert: true, new: true },
 				function (err, doc) {
 					// Token stored, redirect to indicator page
-					// Schedule Iron Worker
 					if(err) {
-						console.log(err);
-						res.send("darn");
+						console.log("Indicator Saving Error", err);
+						res.error(500, "Could not save your indicator. Please try again.");
 						return false;
 					}
 
@@ -138,11 +131,14 @@ app.get('/oauth/google', function (req, res) {
 							},
 							function (err, workerInfo) {
 								if(err) {
+									console.log("Worker Creation Error", err);
+									res.error(500, "Could not setup your indicator. Please try again.");
 									return false;
-									// theoretically this should throw an error and prompt the user to try again
 								}
 								req.db.collection('users').update({ userHash : user.userHash}, { $set : { worker : workerInfo.id } }, function (err, doc) {
-									
+									if(err) {
+										console.log("Worker Save Error", err);
+									}
 								});
 							}
 						);
@@ -189,6 +185,9 @@ function userLookup (req, res, next) {
 	var user = req.params.user;
 	req.db.collection('users').findOne({ userHash : user }, function (err, doc) {
 		if(err || doc === null) {
+			if(err) {
+				console.log("User find error.", err);
+			}
 			res.error(401, "A user could not be found. Please specify an existing user.");
 		}
 		req.user = doc;
@@ -246,8 +245,6 @@ function sendIndicator (indicatorType, requestedFormat, res) {
 		format = "png"
 	}
 
-	console.log(indicatorType);
-
 	var indicatorName;
 	switch (indicatorType) {
 		case indicatorTypes.good:
@@ -264,8 +261,6 @@ function sendIndicator (indicatorType, requestedFormat, res) {
 			indicatorName = "unknown";
 			break;
 	}
-
-	console.log("SENDING FILE", root + "/assets/indicators/" + indicatorName + "." + format);
 
 	return res.sendFile(root + "/assets/indicators/" + indicatorName + "." + format, {
 		maxAge : INDICATOR_CACHE_TIME
@@ -286,7 +281,6 @@ app.all('/user/:user/indicator.:format', function (req, res, next) {
 
 		res.set('X-Error', JSON.stringify(error));
 
-		console.log(indicatorTypes.unknown, requestedFormat, res);
 		sendIndicator(indicatorTypes.unknown, requestedFormat, res);
 		return;
 	}
@@ -337,9 +331,9 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 					third:  function (callback) { getQuartile(3, req.db, req.user, inboxCount, callback) }
 				},
 				function (err, quartiles) {
-					console.log("quartiles", err, quartiles);
 					var indicatorType = indicatorTypes.unknown;
 					if(err) {
+						console.log("Quartile calculation error.", err);
 						sendIndicator(indicatorType, req.params.format, res);
 						return false;
 					}
@@ -355,7 +349,7 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 					if(inbox.count === 0) {
 						var indicatorType = indicatorTypes.good;
 					}
-					
+
 					sendIndicator(indicatorType, req.params.format, res);
 				});
 			}else{
