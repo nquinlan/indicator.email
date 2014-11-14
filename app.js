@@ -311,8 +311,11 @@ app.get('/user/:user/edit', function (req, res) {
 		return false;
 	}
 
+	var user = req.user;
+	user.isNew = Boolean(req.query.created);
+
 	var profile = {
-		user: req.user,
+		user: user,
 		scripts: [
 			{src : '/assets/js/vendor/zeroclipboard/ZeroClipboard.js'},
 			{src : '/assets/js/editProfile.js'}

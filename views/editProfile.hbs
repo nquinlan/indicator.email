@@ -3,7 +3,12 @@
 	
 	<div class="explanation">
 		<h2>Here's What's Up</h2>
-		<p>You've got an indicator! It will monitor your inbox and your behavior to determine what a "normal inbox" is <em>for you</em>. When your inbox is "normal" it will appear yellow, when it's good: green, and overfull: red. Inbox zero will always be green, no matter your habits. Right now it's got some "stupid" defaults, as time goes on it will adapt to you.</p>
+		<p>
+			You've got an indicator! It will monitor your inbox and your behavior to determine what a "normal inbox" is <em>for you</em>. When your inbox is "normal" it will appear yellow, when it's good: green, and overfull: red. Inbox zero will always be green, no matter your habits.
+			{{# user.isNew }}
+				Right now it's got some "stupid" defaults, as time goes on it will adapt to you.
+			{{/ user.isNew }}
+		</p>
 		<h2>Using the Indicator</h2>
 		<p>
 			To use the indicator, simply select &amp; copy the following indicator. Paste it into your <a href="https://mail.google.com/mail/#settings/general">signature</a> or anywhere else you might like.
