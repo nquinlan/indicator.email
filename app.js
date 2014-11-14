@@ -1,5 +1,6 @@
 var express = require('express');
 var basicAuth = require('basic-auth-connect');
+var favicon = require('serve-favicon');
 var exphbs  = require('express-handlebars');
 var google = require('googleapis');
 var db = require ('./middleware/db');
@@ -62,9 +63,7 @@ app.all('*', function (req, res, next) {
 	next();
 });
 
-app.get('/favicon.ico', function(req, res){
-	res.sendFile(root + '/assets/img/favicon.ico');
-});
+app.use(favicon(__dirname + '/assets/img/favicon.ico'));
 
 app.get('/', function(req, res){
 	res.render('home');
