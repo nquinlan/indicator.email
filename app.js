@@ -161,6 +161,11 @@ function getInbox (db, user, cb) {
 	gmail.users.messages.list({ q: "in:inbox", userId: user.email, auth: googleAuthClient}, function (err, inbox) {
 		if (err) {
 			cb(err, null);
+			return false;
+		}
+		if (!inbox) {
+			cb({message : "inbox not found."}, null);
+			return false;
 		}
 		inbox.count = inbox.resultSizeEstimate;
 		inbox.exact = false;
@@ -333,6 +338,10 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 	}
 	
 	getInbox(req.db, req.user, function (err, inbox) {
+		if(err) {
+			res.error(500, "Could not get inbox from Google.");
+			return false;
+		}
 		var inboxes = req.db.collection('inboxes').find({ user: req.user.userHash });
 		// Get Median
 		inboxes.count(function(err, inboxCount){
