@@ -1,11 +1,13 @@
 var express = require('express');
 var basicAuth = require('basic-auth-connect');
+var exphbs  = require('express-handlebars');
 var google = require('googleapis');
 var db = require ('./middleware/db');
 var uuid = require('node-uuid');
 var _ = require('lodash');
 var async = require('async');
 var iron_worker = require('iron_worker');
+var crypto = require('crypto');
 
 require('enum').register();
 
@@ -37,6 +39,11 @@ var indicatorTypes = new Enum(['unknown', 'bad', 'good', 'okay']);
 
 var root = __dirname;
 
+app.engine('.hbs', exphbs({extname: '.hbs', defaultLayout: 'main'}));
+app.set('view engine', '.hbs');
+
+app.use('/assets', express.static(__dirname + '/assets'));
+
 // TEMP CATCH ALL ERROR MESSAGE
 app.all('*', function (req, res, next) {
 	res.error = function (code, message, more) {
@@ -55,10 +62,7 @@ app.all('*', function (req, res, next) {
 });
 
 app.get('/', function(req, res){
-	req.db.collection('users').find().toArray(function(err, users) {
-		console.log(users);
-	});
-	res.send('indicator.email');
+	res.render('home');
 });
 
 app.get('/oauth/google/authenticate', function (req, res) {
@@ -293,12 +297,27 @@ app.all('/user/:user/indicator.:format', function (req, res, next) {
 app.all('/user/:user*', userLookup);
 
 app.get('/user/:user', function (req, res) {
-	res.send(
-				'<h1>' + req.user.email + '</h1>' + 
-				'<p><em>indicator.email shows the status of a user\'s inbox.</em></p>' +
-				'<p><img src="./indicator.svg"></p>' +
-				'<p>When a user\'s inbox is overfull the light will be red. Yellow indicates an average inbox and green a near empty one.</p>'
-			);
+	var profile = {
+		user: req.user
+	};
+
+	profile.user.emailHash = crypto.createHash('md5').update(req.user.email).digest('hex');
+
+	res.render('profile', profile);
+});
+
+app.get('/user/:user/edit', function (req, res) {
+	var profile = {
+		user: req.user,
+		scripts: [
+			{src : '/assets/js/vendor/zeroclipboard/ZeroClipboard.js'},
+			{src : '/assets/js/editProfile.js'}
+		]
+	};
+
+	profile.user.emailHash = crypto.createHash('md5').update(req.user.email).digest('hex');
+
+	res.render('editProfile', profile);
 });
 
 app.get('/user/:user/indicator.:format', function (req, res) {

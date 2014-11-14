@@ -1,0 +1,1 @@
+var client = new ZeroClipboard(document.getElementById("copy-indicator-signature"));

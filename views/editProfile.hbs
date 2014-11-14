@@ -1,0 +1,24 @@
+<div class="profile edit">
+	{{> card }}
+	
+	<div class="explanation">
+		<h2>Using the Indicator</h2>
+		<p>
+			To use the indicator, simply select &amp; copy the following indicator. Paste it into your <a href="https://mail.google.com/mail/#settings/general">signature</a> or anywhere else you might like.
+		</p>
+
+		<div id="indicator-signature">
+			<a href="http://indicator.email/user/{{ user.userHash }}/" title="{{ user.email }}" style="border: 0;">
+				<img width="99" height="20" src="http://indicator.email/user/{{ user.userHash }}/indicator.png" alt="Inbox Status •">
+			</a>
+		</div>
+
+		<div class="copy button has-icon" id="copy-indicator-signature" data-clipboard-target="indicator-signature">
+			<div class="icon">
+				<object class="download" data="/assets/img/clipboard-download.svg" type="image/svg+xml"></object>
+				<object class="checked" data="/assets/img/clipboard-checked.svg" type="image/svg+xml"></object>
+			</div>
+			<div class="text">Copy</div>
+		</div>
+	</div>
+</div>

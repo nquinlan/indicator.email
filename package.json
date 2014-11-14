@@ -30,6 +30,7 @@
     "dotenv": "^0.4.0",
     "enum": "^0.2.6",
     "express": "^4.8.7",
+    "express-handlebars": "^1.1.0",
     "googleapis": "^1.0.11",
     "iron_worker": "^0.1.2",
     "lodash": "^2.4.1",

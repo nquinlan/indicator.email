@@ -25,3 +25,8 @@ To generate the indicator `pngs` from `svgs` use the following command:
 ```sh
 mogrify -magnify -format png assets/indicators/*.svg
 ```
+
+## Credit
+
+- Indicator Icon created from the [Shields.io Format](https://github.com/badges/shields)
+- Clipboard Icon from [Hawcons](http://hawcons.com/)
