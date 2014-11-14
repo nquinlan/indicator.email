@@ -62,6 +62,10 @@ app.all('*', function (req, res, next) {
 	next();
 });
 
+app.get('/favicon.ico', function(req, res){
+	res.sendFile(root + '/assets/img/favicon.ico');
+});
+
 app.get('/', function(req, res){
 	res.render('home');
 });
