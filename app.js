@@ -291,6 +291,10 @@ app.all('/user/:user/indicator.:format', function (req, res, next) {
 app.all('/user/:user*', userLookup);
 
 app.get('/user/:user', function (req, res) {
+	if(!req.user) {
+		return false;
+	}
+
 	var profile = {
 		user: req.user
 	};
@@ -301,6 +305,10 @@ app.get('/user/:user', function (req, res) {
 });
 
 app.get('/user/:user/edit', function (req, res) {
+	if(!req.user) {
+		return false;
+	}
+
 	var profile = {
 		user: req.user,
 		scripts: [
