@@ -23,5 +23,5 @@ heroku run mkdir /tmp/gems/; export GEM_HOME="/tmp/gems"; gem install iron_worke
 To generate the indicator `pngs` from `svgs` use the following command:
 
 ```sh
-mogrify -magnify -format png assets/indicator/*.svg
+mogrify -magnify -format png assets/indicators/*.svg
 ```
