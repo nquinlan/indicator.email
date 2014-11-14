@@ -1,5 +1,6 @@
 # indicator.email
 
+![Inbox Status •](assets/indicators/good.svg) ![Inbox Status •](assets/indicators/okay.svg) ![Inbox Status •](assets/indicators/bad.svg)
 
 ## Setup
 
