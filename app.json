@@ -27,8 +27,8 @@
     },
     "INDICATOR_CACHE_TIME" : {
       "required" : true,
-      "description": "The time clients should cache indicators.",
-      "value": "3600"
+      "description": "The time clients should cache indicators (in milliseconds).",
+      "value": "360000"
     },
     "API_CLIENT_ID" : {
       "required" : true,
