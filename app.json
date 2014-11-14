@@ -25,6 +25,11 @@
       "description": "The redirect URI Google is expecting. This should be to your app.",
       "value": "https://your-app.herokuapp.com/oauth/google"
     },
+    "INDICATOR_CACHE_TIME" : {
+      "required" : true,
+      "description": "The time clients should cache indicators.",
+      "value": "3600"
+    },
     "API_CLIENT_ID" : {
       "required" : true,
       "description": "An ID to be used as an API User",
@@ -34,11 +39,6 @@
       "required" : true,
       "description": "A key to be used as an API key.",
       "generator": "secret"
-    },
-    "INDICATOR_CACHE_TIME" : {
-      "required" : true,
-      "description": "The time clients should cache indicators.",
-      "value": "3600"
     }
   },
   "addons": [
