@@ -81,7 +81,7 @@ git push heroku master
 `indicator.email` relies on an [iron worker](http://www.iron.io/worker) to regularly check inboxes. You must deploy that iron worker. 
  
 ```
-heroku run mkdir /tmp/gems/; export GEM_HOME="/tmp/gems"; gem install iron_worker_ng; cd helpers/iron_worker; /tmp/gems/bin/iron_worker upload poll
+heroku run "mkdir /tmp/gems/; export GEM_HOME='/tmp/gems'; gem install iron_worker_ng; cd helpers/iron_worker; /tmp/gems/bin/iron_worker upload poll"
 ``` 
 
 
