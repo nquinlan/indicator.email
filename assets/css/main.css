@@ -157,6 +157,7 @@ header h2 {
 
 .profile .card .icon {
     float: left;
+    margin-right: 20px;
 }
 
 .profile .card .info {
