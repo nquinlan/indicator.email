@@ -108,6 +108,7 @@ npm install
 
 ```sh
 cp .env.example .env
+alias edit="${EDITOR:-vi}"
 edit .env
 ```
 
