@@ -1,0 +1,48 @@
+{
+  "name": "indicator.email",
+  "description": "A status light for your email",
+  "website": "http://indicator.email/",
+  "repository": "https://github.com/nquinlan/indicator.email",
+  "logo": "https://indicator-email.herokuapp.com/assets/indicators/good.svg",
+  "keywords": ["node", "email", "gmail", "productivity"],
+  "success_url": "/",
+  "scripts": {
+    "postdeploy": "heroku run mkdir /tmp/gems/; export GEM_HOME='/tmp/gems'; gem install iron_worker_ng; cd helpers/iron_worker; /tmp/gems/bin/iron_worker upload poll"
+  },
+  "env" : {
+    "GOOGLE_CLIENT_ID" : {
+      "required" : true,
+      "description": "Your Google App's Client ID. You will need to create a Google Application with OAuth Credentials. https://console.developers.google.com/",
+      "value": "example.apps.googleusercontent.com"
+    },
+    "GOOGLE_CLIENT_SECRET" : {
+      "required" : true,
+      "description": "The Client Secret from your Google App.",
+      "value": "EXAMPLE123456"
+    },
+    "GOOGLE_REDIRECT_URL" : {
+      "required" : true,
+      "description": "The redirect URI Google is expecting. This should be to your app.",
+      "value": "https://your-app.herokuapp.com/oauth/google"
+    },
+    "API_CLIENT_ID" : {
+      "required" : true,
+      "description": "An ID to be used as an API User",
+      "generator": "secret"
+    },
+    "API_CLIENT_SECRET" : {
+      "required" : true,
+      "description": "A key to be used as an API key.",
+      "generator": "secret"
+    },
+    "INDICATOR_CACHE_TIME" : {
+      "required" : true,
+      "description": "The time clients should cache indicators.",
+      "value": "3600"
+    }
+  },
+  "addons": [
+    "iron_worker",
+    "mongolab"
+  ]
+}
