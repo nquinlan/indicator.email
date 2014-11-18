@@ -25,7 +25,6 @@ var API_CLIENT_ID = process.env.API_CLIENT_ID;
 var API_CLIENT_SECRET = process.env.API_CLIENT_SECRET;
 var PORT = process.env.PORT || 3000;
 
-var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 var gmail = google.gmail('v1');
 var plus = google.plus('v1'); 
 
@@ -70,6 +69,7 @@ app.get('/', function(req, res){
 });
 
 app.get('/oauth/google/authenticate', function (req, res) {
+	var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 	var url = googleAuthClient.generateAuthUrl({
 		access_type: 'offline',
 		scope: [
@@ -82,6 +82,7 @@ app.get('/oauth/google/authenticate', function (req, res) {
 });
 
 app.get('/oauth/google', function (req, res) {
+	var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 	googleAuthClient.getToken(req.query.code, function (err, tokens) {
 		googleAuthClient.setCredentials(tokens);
 		plus.people.get({ userId: 'me', auth: googleAuthClient }, function(err, profile) {
@@ -160,6 +161,7 @@ app.get('/oauth/google', function (req, res) {
 });
 
 function getInbox (db, user, cb) {
+	var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
 	googleAuthClient.setCredentials(user.tokens.google);
 	gmail.users.messages.list({ q: "in:inbox", userId: user.email, auth: googleAuthClient}, function (err, inbox) {
 		if (err) {
