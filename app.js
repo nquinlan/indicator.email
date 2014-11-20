@@ -69,15 +69,19 @@ app.get('/', function(req, res){
 });
 
 app.get('/oauth/google/authenticate', function (req, res) {
-	var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
-	var url = googleAuthClient.generateAuthUrl({
+	var authOptions = {
 		access_type: 'offline',
 		scope: [
 			'https://www.googleapis.com/auth/plus.me',
 			'https://www.googleapis.com/auth/userinfo.email',
 			'https://www.googleapis.com/auth/gmail.readonly'
 		]
-	});
+	};
+	if(req.query.force) {
+		authOptions['approval_prompt'] = 'force';
+	}
+	var googleAuthClient = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL);
+	var url = googleAuthClient.generateAuthUrl(authOptions);
 	res.redirect(302, url);	
 });
 
