@@ -315,7 +315,7 @@ app.get('/user/:user', function (req, res) {
 		user: req.user
 	};
 
-	profile.user.emailHash = crypto.createHash('md5').update(req.user.email).digest('hex');
+	profile.user.emailHash = crypto.createHash('md5').update(req.user.email.toLowerCase()).digest('hex');
 
 	res.render('profile', profile);
 });
