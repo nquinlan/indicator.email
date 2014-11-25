@@ -341,6 +341,18 @@ app.get('/user/:user/edit', function (req, res) {
 	res.render('editProfile', profile);
 });
 
+function calculateQuartilesStupidly (inbox) {
+	var indicatorType = indicatorTypes.unknown;
+	if(inbox.count > 10) {
+		indicatorType = indicatorTypes.bad;
+	} else if(inbox.count < 5) {
+		indicatorType = indicatorTypes.good;
+	} else {
+		indicatorType = indicatorTypes.okay;
+	}
+	sendIndicator(indicatorType, req.params.format, res);
+}
+
 app.get('/user/:user/indicator.:format', function (req, res) {
 	if(!req.user) {
 		return false;
@@ -365,33 +377,26 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 					var indicatorType = indicatorTypes.unknown;
 					if(err) {
 						console.log("Quartile calculation error.", err);
-						sendIndicator(indicatorType, req.params.format, res);
+						calculateQuartilesStupidly(inbox);
 						return false;
 					}
 
-					if(inbox.count > quartiles.third) {
-						var indicatorType = indicatorTypes.bad;
-					} else if(inbox.count < quartiles.first) {
-						var indicatorType = indicatorTypes.good;
+					if(inbox.count > quartiles.third.count) {
+						indicatorType = indicatorTypes.bad;
+					} else if(inbox.count < quartiles.first.count) {
+						indicatorType = indicatorTypes.good;
 					} else {
-						var indicatorType = indicatorTypes.okay;
+						indicatorType = indicatorTypes.okay;
 					}
 
 					if(inbox.count === 0) {
-						var indicatorType = indicatorTypes.good;
+						indicatorType = indicatorTypes.good;
 					}
 
 					sendIndicator(indicatorType, req.params.format, res);
 				});
 			}else{
-				if(inbox.count > 10) {
-					var indicatorType = indicatorTypes.bad;
-				} else if(inbox.count < 5) {
-					var indicatorType = indicatorTypes.good;
-				} else {
-					var indicatorType = indicatorTypes.okay;
-				}
-				sendIndicator(indicatorType, req.params.format, res);
+				calculateQuartilesStupidly(inbox);
 			}
 		});
 		
