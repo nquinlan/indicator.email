@@ -341,7 +341,7 @@ app.get('/user/:user/edit', function (req, res) {
 	res.render('editProfile', profile);
 });
 
-function calculateQuartilesStupidly (inbox) {
+function calculateQuartilesStupidly (inbox, req, res) {
 	var indicatorType = indicatorTypes.unknown;
 	if(inbox.count > 10) {
 		indicatorType = indicatorTypes.bad;
@@ -377,7 +377,7 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 					var indicatorType = indicatorTypes.unknown;
 					if(err) {
 						console.log("Quartile calculation error.", err);
-						calculateQuartilesStupidly(inbox);
+						calculateQuartilesStupidly(inbox, req, res);
 						return false;
 					}
 
@@ -396,7 +396,7 @@ app.get('/user/:user/indicator.:format', function (req, res) {
 					sendIndicator(indicatorType, req.params.format, res);
 				});
 			}else{
-				calculateQuartilesStupidly(inbox);
+				calculateQuartilesStupidly(inbox, req, res);
 			}
 		});
 		
